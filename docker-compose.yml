@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # 1. O Cérebro
+  ms-eureka-server:
+    build: ./ms-eureka-server 
+    ports:
+      - "8761:8761"
+
+  # 2. Os Especialistas
+  ms-payment:
+    build: ./ms-payment
+    environment:
+      # Diz ao Spring para usar o nome do serviço Docker, não localhost
+      - EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE=http://ms-eureka-server:8761/eureka/
+    depends_on:
+      - ms-eureka-server
+
+  ms-restaurant:
+    build: ./ms-restaurant
+    environment:
+      - EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE=http://ms-eureka-server:8761/eureka/
+    depends_on:
+      - ms-eureka-server
+
+  ms-delivery:
+    build: ./ms-delivery
+    environment:
+      - EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE=http://ms-eureka-server:8761/eureka/
+    depends_on:
+      - ms-eureka-server
+
+  # 3. O Orquestrador
+  ms-order-orchestrator:
+    build: ./ms-order-orchestrator
+    environment:
+      - EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE=http://ms-eureka-server:8761/eureka/
+    depends_on:
+      - ms-eureka-server
+      - ms-payment
+      - ms-restaurant
+      - ms-delivery
+
+  # 4. O Porteiro
+  ms-gateway:
+    build: ./ms-gateway
+    ports:
+      - "8888:8888" # Porta principal do sistema (para o k6)
+    environment:
+      - EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE=http://ms-eureka-server:8761/eureka/
+    depends_on:
+      - ms-eureka-server
+      - ms-order-orchestrator
