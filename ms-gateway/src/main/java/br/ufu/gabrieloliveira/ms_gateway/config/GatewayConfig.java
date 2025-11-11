@@ -24,7 +24,13 @@ public class GatewayConfig {
                         // (O que estava no seu uri)
                         .uri("lb://ms-order-orchestrator"))
 
-                // Se precisar adicionar outras rotas, adicione outro .route(...) aqui
+                .route("payment-debug-route", r -> r
+                        // Rota para controlar o ms-payment
+                        .path("/api/v1/payment/debug/**")
+                        // Remove /api/v1/payment
+                        .filters(f -> f.stripPrefix(3))
+                        // Encaminha para o ms-payment
+                        .uri("lb://ms-payment"))
 
                 .build();
     }
