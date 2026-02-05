@@ -1,6 +1,7 @@
 package br.ufu.gabrieloliveira.ms_order_orchestrator.service;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,11 @@ public class PaymentService {
     // 1. nome do Circuit Breaker
     private static final String PAYMENT_SERVICE_CB = "paymentService";
 
+    // RETRY: para falhas transientes (rápidas)
+    // CIRCUIT BREAKER: para falhas persistentes (longas)
+
     // 2. Anota o metodo com o Circuit Breaker e aponta para um metodo de "fallback" (plano B)
+    @Retry(name = "paymentService")
     @CircuitBreaker(name = PAYMENT_SERVICE_CB, fallbackMethod = "fallbackPayment")
     public ResponseEntity<String> callPaymentService() {
         // 3. Esta é a lógica que estava no seu controller
