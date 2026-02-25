@@ -23,7 +23,6 @@ public class PaymentService {
     @Retry(name = "paymentService")
     @CircuitBreaker(name = PAYMENT_SERVICE_CB, fallbackMethod = "fallbackPayment")
     public ResponseEntity<String> callPaymentService() {
-        // 3. Esta é a lógica que estava no seu controller
         String response = restTemplate.postForObject(
                 "http://ms-payment/pay", //
                 null,
@@ -32,7 +31,7 @@ public class PaymentService {
         return ResponseEntity.ok(response);
     }
 
-    // 4. Fallback: o que fazer se o circuito abrir?
+    // 3. Fallback: o que fazer se o circuito abrir?
     // (chamado automaticamente pelo Resilience4j quando o 'pay' falhar)
     public ResponseEntity<String> fallbackPayment(Throwable t) {
         String errorBody = "{\"status\": \"PAGAMENTO_FALHOU_FAIL_FAST\", \"error_details\": \"" + t.getMessage() + "\"}";
