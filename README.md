@@ -10,7 +10,7 @@
 ![Architecture](https://img.shields.io/badge/Microservices-Resilience-blue)
 
 ## 📝 Abstract
-Modern software development has shifted toward microservices to achieve scalability and independence. However, this distribution introduces vulnerabilities such as cascading failures. This project **evaluates the efficacy of the Circuit Breaker and Retry patterns** using a quantitative experimental approach. By leveraging Resilience4j and **k6 load testing, we demonstrate how **hybrid resilience strategies prevent resource exhaustion and maintain system availability under stress**.
+Modern software development has shifted toward microservices to achieve scalability and independence. However, this distribution introduces vulnerabilities such as cascading failures. This project **evaluates the efficacy of the Circuit Breaker and Retry patterns** using a quantitative experimental approach. By leveraging Resilience4j and k6 load testing, we demonstrate how **hybrid resilience strategies prevent resource exhaustion and maintain system availability under stress**.
 
 ## 🏗️ System Architecture
 The platform simulates a distributed food delivery workflow where a single transaction triggers a chain of synchronous operations across multiple specialized services. This architecture acts as a controlled testbed to evaluate the "cascading failure" phenomenon—a scenario where a localized delay in a secondary service can lead to global resource exhaustion in the orchestrator.
