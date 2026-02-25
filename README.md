@@ -10,17 +10,19 @@
 ![Architecture](https://img.shields.io/badge/Microservices-Resilience-blue)
 
 ## 📝 Abstract
-Modern software development has shifted toward microservices to achieve scalability and independence. However, this distribution introduces vulnerabilities such as cascading failures. This project evaluates the efficacy of the Circuit Breaker and Retry patterns using a quantitative experimental approach. By leveraging Resilience4j and k6 load testing, we demonstrate how hybrid resilience strategies prevent resource exhaustion and maintain system availability under stress.
+Modern software development has shifted toward microservices to achieve scalability and independence. However, this distribution introduces vulnerabilities such as cascading failures. This project **evaluates the efficacy of the Circuit Breaker and Retry patterns** using a quantitative experimental approach. By leveraging Resilience4j and **k6 load testing, we demonstrate how **hybrid resilience strategies prevent resource exhaustion and maintain system availability under stress**.
 
 ## 🏗️ System Architecture
-The testbed is a containerized ecosystem orchestrated via Docker Compose, simulating a delivery platform:
+The platform simulates a distributed food delivery workflow where a single transaction triggers a chain of synchronous operations across multiple specialized services. This architecture acts as a controlled testbed to evaluate the "cascading failure" phenomenon—a scenario where a localized delay in a secondary service can lead to global resource exhaustion in the orchestrator.
 
-- **Infrastructure Layer:** Includes Spring Cloud Gateway for centralized routing and Netflix Eureka for dynamic service discovery.
-- **Orchestration Layer:** The ms-order-orchestrator implements the resilience logic using Resilience4j.
-- **Domain Layer:** Consists of independent microservices (ms-payment, ms-restaurant, ms-delivery).
+To ensure a robust and scalable environment, the system is organized into three distinct layers:
+
+- **Infrastructure Layer:** Utilizes **Spring Cloud Gateway** for centralized request routing and **Netflix Eureka** for **dynamic service discovery**, ensuring that the orchestrator can locate domain services without static IP coupling.
+- **Orchestration Layer:** Centered on the `ms-order-orchestrator`, which manages the order lifecycle. This component integrates Resilience4j to implement the **Circuit Breaker** and **Retry** patterns, serving as the primary defense against network instability.
+- **Domain Layer:** Consists of independent microservices — `ms-payment`, `ms-restaurant`, and `ms-delivery` — that handle specific business logic. In the experiment, the payment service is the target of **systematic fault injection (artificial latency)** to stress-test the system's resilience.
 
 <p align="center">
-  <img src="./assets/arch.png" width="800" title="Microservices Architecture">
+  <img src="./assets/arch.png" title="Microservices Architecture">
 </p>
 
 ## 🧪 Methodology & Fault Injection
