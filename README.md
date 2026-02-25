@@ -22,7 +22,7 @@ To ensure a robust and scalable environment, the system is organized into three 
 - **Domain Layer:** Consists of independent microservices — `ms-payment`, `ms-restaurant`, and `ms-delivery` — that handle specific business logic. In the experiment, the payment service is the target of **systematic fault injection (artificial latency)** to stress-test the system's resilience.
 
 <p align="center">
-  <img src="./assets/arch.png" title="Microservices Architecture">
+  <img src="./assets/arch.png" width="900" title="Microservices Architecture">
 </p>
 
 ## 🧪 Methodology & Fault Injection
@@ -31,6 +31,14 @@ To validate the hypothesis, a systematic fault injection protocol was employed:
 1. **Baseline Scenario:** Establishing performance metrics under normal conditions.
 2. **Latency Injection:** Introducing a 3-second artificial delay (Thread.sleep) in the payment service to simulate downstream degradation.
 3. **Stress Testing:** Utilizing k6 to inject 50 simultaneous Virtual Users (VUs) to induce thread exhaustion.
+
+## 📊 Key Results
+The implementation of the hybrid strategy (Circuit Breaker + Retry) yielded significant performance improvements under stress:
+
+| Metric (k6) | Unprotected System | With CB + Retry | Impact |
+| :--- | :--- | :--- | :--- |
+| **p95 Latency** | ~3030 ms | 138.39 ms | **95% reduction** |
+| **Throughput** | 402 reqs | 1292 reqs | **3.2x increase** |
 
 ## 🛠️ Tech Stack
 
