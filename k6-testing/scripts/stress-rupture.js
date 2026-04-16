@@ -1,22 +1,31 @@
 import http from 'k6/http';
-import { check, group } from 'k6';
+import { check, group, fail } from 'k6';
 
-// Infrastructure and Service endpoints
+const ORCHESTRATOR_SETUP_URL = 'http://localhost:8888/api/v1/setup/resilience';
 const DEBUG_URL = 'http://localhost:8888/api/v1/payment/debug';
 const ORDERS_URL = 'http://localhost:8888/api/v1/orders';
 
 export const options = {
     stages: [
         { duration: '30s', target: 50 },  // Warm-up
-        { duration: '1m', target: 300 },  // Stress: Exceeding the 200-thread limit 
+        { duration: '1m', target: 300 },  // Stress: Exceeding the 200-thread Tomcat limit
         { duration: '30s', target: 0 },   // Cool-down
     ],
 };
 
-// Setup: Enable 3s latency before starting the load
 export function setup() {
-    const res = http.get(`${DEBUG_URL}/latency/on`);
-    if (res.status !== 200) throw new Error('Failed to enable latency simulation');
+    // 1. Read environment variables (default to false)
+    const retry = __ENV.RETRY === 'true';
+    const cb = __ENV.CB === 'true';
+
+    // 2. Configure Orchestrator Architecture
+    const archRes = http.post(`${ORCHESTRATOR_SETUP_URL}?retry=${retry}&cb=${cb}`);
+    if (archRes.status !== 200) fail(`Architecture setup failed. Status: ${archRes.status}`);
+    console.log(`--- ARCHITECTURE SETUP: Retry=${retry} | CircuitBreaker=${cb} ---`);
+
+    // 3. Enable 3s Latency Fault
+    const faultRes = http.get(`${DEBUG_URL}/latency/on`);
+    if (faultRes.status !== 200) fail('Failed to enable latency simulation');
     console.log('--- RUPTURE TEST: 3s Latency ENABLED ---');
 }
 
@@ -27,7 +36,6 @@ export default function () {
             'is status 200': (r) => r.status === 200,
         });
     });
-    // No sleep: Maximizing request pressure to saturate the thread pool [cite: 212]
 }
 
 export function teardown() {

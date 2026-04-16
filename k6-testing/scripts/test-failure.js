@@ -1,6 +1,7 @@
 import http from 'k6/http';
-import { check, group } from 'k6';
+import { check, group, fail } from 'k6';
 
+const ORCHESTRATOR_SETUP_URL = 'http://localhost:8888/api/v1/setup/resilience';
 const DEBUG_URL = 'http://localhost:8888/api/v1/payment/debug';
 const ORDERS_URL = 'http://localhost:8888/api/v1/orders';
 
@@ -9,11 +10,16 @@ export const options = {
     duration: '1m',
 };
 
-// Setup: Enable immediate 503 errors
 export function setup() {
-    const res = http.get(`${DEBUG_URL}/error/on`);
-    if (res.status !== 200) throw new Error('Failed to enable error simulation');
-    console.log('--- FAST FAILURE TEST: 503 Errors ENABLED ---');
+    // 1. Force Hybrid Architecture (CB + Retry)
+    const archRes = http.post(`${ORCHESTRATOR_SETUP_URL}?retry=true&cb=true`);
+    if (archRes.status !== 200) fail(`Architecture setup failed. Status: ${archRes.status}`);
+
+    // 2. Enable immediate 503 errors
+    const faultRes = http.get(`${DEBUG_URL}/error/on`);
+    if (faultRes.status !== 200) fail('Failed to enable error simulation');
+
+    console.log('--- FAST FAILURE TEST: 503 Errors ENABLED | Hybrid Architecture ---');
 }
 
 export default function () {
@@ -27,4 +33,5 @@ export default function () {
 
 export function teardown() {
     http.get(`${DEBUG_URL}/turn-off`);
+    console.log('--- CLEANUP: Simulations DISABLED ---');
 }

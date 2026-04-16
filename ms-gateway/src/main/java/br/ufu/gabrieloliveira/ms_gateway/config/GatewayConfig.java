@@ -32,6 +32,11 @@ public class GatewayConfig {
                         // Encaminha para o ms-payment
                         .uri("lb://ms-payment"))
 
+                .route("resilience-setup-route", r -> r
+                        .path("/api/v1/setup/**")
+                        .filters(f -> f.stripPrefix(2))
+                        .uri("lb://ms-order-orchestrator"))
+
                 .build();
     }
 }
